@@ -8,7 +8,7 @@ const app: Application = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
-app.use("/users", userRoutes);//use user routes
+app.use("/api/v1/users", userRoutes );//api base path
 
 app.get("/ping", async (_req : Request, res: Response) => {//for Project 300 testing purposes
     res.json({
