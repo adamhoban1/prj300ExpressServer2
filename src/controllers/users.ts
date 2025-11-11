@@ -2,9 +2,30 @@ import { Request, Response } from 'express';
 import { User } from '../models/user';
 import { collections } from '../database';
 
-export const getUsers = (req: Request, res: Response) => {
-    res.json({"message": "getUsers received"})
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+
+    const users = (await collections.users?.find({}).toArray()) as unknown as User[];
+    if (users) {
+      res.status(200).send(users);
+    }
+    else {
+      res.status(500).send("Failed to get users.");
+    }
+    
+
+  } catch (error) {
+    if (error instanceof Error) 
+      { 
+        console.log(`issue with inserting ${error.message}`);
+      }
+      else{
+        console.log(`error with ${error}`)
+      }
+      res.status(500).send("Failed to get users.");
+    }
 };
+
 
 export const getUserById = (req: Request, res: Response) => {
     let id:string = req.params.id;
