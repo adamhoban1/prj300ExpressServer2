@@ -2,10 +2,12 @@ import express, {Application, Request, Response} from "express" ;//test
 import morgan from "morgan";
 import userRoutes from "./routes/users";//import user routes
 import dotenv from "dotenv";
+import { initDb } from "./database";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3001;
+initDb();
 
 const app: Application = express();
 
