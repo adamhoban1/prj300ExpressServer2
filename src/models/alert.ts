@@ -11,18 +11,19 @@ export interface alert {
     datecreated?: Date;
 }
 
-/**
-export const createUserSchema = z.object({
-    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/), // Letters, spaces and numbers
-    password: z.string().min(6),
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/), // E.164 format 
-    email: z.email()
+
+export const createalertSchema = z.object({
+    category: z.string().min(1),
+    severity: z.string().min(1),
+    notes: z.string().min(1).optional(),
+    location: z.string().min(1),
+    Reportedby: z.string().min(24)
 });
 
-export const updateUserSchema = z.object({
-  username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(), // Only letters and spaces
-    password: z.string().min(6).optional(),
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(), // E.164 format 
-    email: z.email().optional()
+export const updatealertSchema = z.object({
+    category: z.string().min(1).optional(),
+    severity: z.string().min(1).optional(),
+    notes: z.string().min(1).optional(),
+    location: z.string().min(1).optional(),
 });
-*/
+

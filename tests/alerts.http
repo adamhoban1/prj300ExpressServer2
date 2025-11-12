@@ -1,0 +1,30 @@
+@userendpoint = http://localhost:3000/api/v1/alert
+
+###
+### POST Request for a user
+## Expected result is ........ it works
+
+
+
+POST {{userendpoint}} HTTP/1.1
+content-type: application/json
+//x-api-key: blahblah
+
+{
+    "category" : "Tree fallen",
+    "severity" : "Moderate",
+   "notes" : "it fell on the road",
+   "location": "ballyhackamore",
+   "Reportedby": "691462ec0a73737c0ae4b2db"
+}
+
+
+
+
+
+###
+GET {{userendpoint}} HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+###
