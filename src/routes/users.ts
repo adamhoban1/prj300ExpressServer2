@@ -1,4 +1,6 @@
 import express, {Router} from 'express';
+import { validate } from '../middleware/validate.middleware';
+import { createUserSchema, updateUserSchema } from '../models/user';
 import {
     getUsers,
     getUserById,
@@ -11,8 +13,8 @@ const router: Router = express.Router();
 
 router.get('/', getUsers);
 router.get('/:id', getUserById);
-router.post('/', createUser);
-router.put('/:id', updateUser);
+router.post('/',validate(createUserSchema), createUser);
+router.put('/:id',validate(updateUserSchema), updateUser);
 router.delete('/:id', deleteUser);
 
 export default router;
