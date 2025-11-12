@@ -1,13 +1,20 @@
+@userendpoint = http://localhost:3000/api/v1/users
+
 ###
 ### POST Request for a user
-## Expected result is ........
-POST http://localhost:3000/api/v1/users HTTP/1.1
-content-type: application/json
+## Expected result is ........ it works
 
-{ 
-    "name" : "John Doe",
-    "phonenumber" : "0871234567",
-    "email": "jdoe123@gmail.com"
+
+
+POST {{userendpoint}} HTTP/1.1
+content-type: application/json
+//x-api-key: blahblah
+
+{
+    "username" : "AdamHo22wwban2",
+    "password" : "Password123",
+   "phonenumber" : "0871233456",
+   "email": "s00253815@bing.ie"
 }
 
 
@@ -15,7 +22,29 @@ content-type: application/json
 
 
 ###
-GET http://localhost:3000/api/v1/users HTTP/1.1
+GET {{userendpoint}} HTTP/1.1
 content-type: application/json
+x-api-key: blahblah
 
 ###
+GET http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+### POST: Create user with invalid phone number (should fail validation)
+PUT http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
+Content-Type: application/json
+
+{
+    "username" : "middlewaretest",
+    "password" : "Password123",
+   "phonenumber" : "0871274675",
+   "email": "s00253815@me.com"
+}
+
+###
+
+DELETE http://localhost:3000/api/v1/users/6913c269fcf22563cae05a18 HTTP/1.1
+content-type: application/json
+x-api-key: blahblah HTTP/1.1
+

@@ -54,29 +54,67 @@ export const getUserById = async (req: Request, res: Response) => {
 
 
 export const createUser = async (req: Request, res: Response) => {
-  console.log(req.body);
+  // create a new user in the database
 
-  const newUser = req.body as User;
-  try {
-    const result = await collections.users?.insertOne(newUser)
-    if (result) {
-      res.status(201).location(`${result.insertedId}`).json({ message: `Created a new user with id ${result.insertedId}` })
+console.log(req.body); //for now still log the data
+const {username, password, phonenumber, email} = req.body;
+
+const newUser : User = {username: username, password: password, phonenumber: phonenumber, email: email, dateJoined: new Date()};
+
+
+try {
+  const result = await collections.users?.insertOne(newUser)
+
+if (result) {
+  res.status(201).location(`${result.insertedId}`).json({ message: `Created a new user with id ${result.insertedId}` })
+}
+else {
+  res.status(500).send("Failed to create a new user.");
+}
+}
+catch (error) {
+  if (error instanceof Error) 
+    { 
+      console.log(`Unable to create new user ${error.message}`);
     }
-    else {
-      res.status(500).send("Failed to create a new user.");
+    else{
+      console.log(`error with ${error}`)
     }
-  }
-  catch (error) {
-    console.error(error);
-    res.status(400).send(`Unable to create new user`);
+    res.status(400).send(`Unable to create new user ${req.params.id}`);
   }
 };
 
 
 
-export const updateUser = (req: Request, res: Response) => {
-    console.log(req.body); 
-    res.json({"message": `update user ${req.params.id} with data from the post message`})
+export const updateUser = async (req: Request, res: Response) => {
+
+    const id: string = req.params.id;
+
+    try {
+        const query = { _id: new ObjectId(id) };
+        const result = await collections.users?.updateOne(query, { $set: req.body });
+        
+        console.log(result);
+
+        if (result && result.matchedCount) {
+            res.status(200).send(`Updated user with id ${id}`);
+        } else if (!result?.matchedCount) {
+            res.status(404).send(`User with id ${id} not found`);
+        } else {
+            res.status(304).send(`User with id: ${id} not updated`);
+        }
+    } catch (error) {
+        if (error instanceof Error)
+            {
+                console.log(`issue with inserting ${error.message}`);
+            }
+            else{
+                console.log(`error with ${error}`)
+            }
+            res.status(500).send(`Unable to update user ${id}`);
+        }
+
+ 
 };
 
 export const deleteUser = async(req: Request, res: Response) => {
