@@ -27,6 +27,13 @@ content-type: application/json
 x-api-key: blahblah
 
 ###
+
+###
+GET https://blastostylar-merrie-transitionally.ngrok-free.dev/api/v1/users HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+###
 GET http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
 content-type: application/json
 x-api-key: blahblah

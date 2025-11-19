@@ -54,32 +54,31 @@ export const getReportById = async (req: Request, res: Response) => {
 
 
 export const createReport = async (req: Request, res: Response) => {
-  // create a new report in the database
+  const { category, severity, notes, location, Reportedby } = req.body;
 
-console.log(req.body); //for now still log the data
-const {category, severity, notes, location, Reportedby} = req.body;
+  const newReport: Report = {
+    category,
+    severity,
+    notes,
+    location,
+    timestamp: new Date().toISOString()
+  };
 
-const newReport : Report = {category: category, severity: severity, notes: notes, location: location, timestamp: new Date().toISOString()};
+  try {
+    const result = await collections.Reports?.insertOne(newReport);
 
-
-try {
-  const result = await collections.Reports?.insertOne(newReport)
-if (result) {
-  res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
-}
-else {
-  res.status(500).send("Failed to create a new Report.");
-}
-}
-catch (error) {
-  if (error instanceof Error) 
-    { 
-      console.log(`Unable to create new Report ${error.message}`);
+    if (result) {
+      // Include the MongoDB generated _id in the response
+      res.status(201).json({
+        _id: result.insertedId,
+        ...newReport
+      });
+    } else {
+      res.status(500).json({ message: "Failed to create a new Report." });
     }
-    else{
-      console.log(`error with ${error}`)
-    }
-    res.status(400).send(`Unable to create new Report ${req.params.id}`);
+  } catch (error) {
+    console.error(`Unable to create new Report: ${error}`);
+    res.status(500).json({ message: "Server error while creating report." });
   }
 };
 

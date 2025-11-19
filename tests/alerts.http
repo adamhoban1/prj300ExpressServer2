@@ -11,9 +11,9 @@ content-type: application/json
 //x-api-key: blahblah
 
 {
-  "severity": "High",
-  "category": "Fire",
-  "notes": "Smoke detected in the server room.",
+  "severity": "Low",
+  "category": "Flood",
+  "notes": "there is a flood in my house.",
   "timestamp": "2025-11-19T14:30:00Z",
   "location": {
     "lat": 53.3498,
@@ -23,12 +23,18 @@ content-type: application/json
 }
 
 
+###
+GET https://blastostylar-merrie-transitionally.ngrok-free.dev/api/v1/alert HTTP/1.1
+content-type: application/json
+
+###
+
+
 
 
 
 ###
-GET {{userendpoint}} HTTP/1.1
+GET http://localhost:3000/api/v1/alert HTTP/1.1
 content-type: application/json
-x-api-key: blahblah
 
 ###
