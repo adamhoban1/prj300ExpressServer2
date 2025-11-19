@@ -1,10 +1,11 @@
 import express, {Application, Request, Response} from "express" ;//test
 import morgan from "morgan";
-import userRoutes from "./routes/users";//import user routes
-import alertRoutes from "./routes/alert";//import alert routes
+import userRoutes from "./Report/users";//import user routes
+import alertRoutes from "./Report/alert";//import alert routes
 import dotenv from "dotenv";
 import { initDb } from "./database";
 import { authenticateKey } from "./middleware/auth.middleware";
+import cors from "cors";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const PORT = process.env.PORT || 3001;
 
 
 const app: Application = express();
-
+app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api/v1/users", userRoutes );//api base path
