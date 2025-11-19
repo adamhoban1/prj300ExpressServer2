@@ -11,11 +11,15 @@ content-type: application/json
 //x-api-key: blahblah
 
 {
-    "category" : "Tree fallen",
-    "severity" : "Moderate",
-   "notes" : "it fell on the road",
-   "location": "ballyhackamore",
-   "Reportedby": "691462ec0a73737c0ae4b2db"
+  "severity": "High",
+  "category": "Fire",
+  "notes": "Smoke detected in the server room.",
+  "timestamp": "2025-11-19T14:30:00Z",
+  "location": {
+    "lat": 53.3498,
+    "lng": -6.2603,
+    "address": "123 Main St, Dublin"
+  }
 }
 
 

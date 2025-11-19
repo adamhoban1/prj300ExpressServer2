@@ -7,7 +7,7 @@ const connectionString: string = process.env.DB_CONN_STRING || "";
 const dbName: string = process.env.DB_NAME || "Web2_2025";
 const client = new MongoClient(connectionString);
 
-export const collections: { users?: Collection; alerts?: Collection } = {}
+export const collections: { users?: Collection; Reports?: Collection } = {}
 
 if (connectionString == "") {
     throw new Error("No connection string in .env");
@@ -23,7 +23,7 @@ export async function initDb(): Promise<void> {
         const usersCollection: Collection = db.collection('users')
         collections.users = usersCollection;
         const alertCollection: Collection = db.collection('alert')
-        collections.alerts = alertCollection;
+        collections.Reports = alertCollection;
         console.log('connected to database')
     }
     catch (error) {
