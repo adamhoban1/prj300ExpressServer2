@@ -86,34 +86,25 @@ catch (error) {
 
 
 export const updateReport = async (req: Request, res: Response) => {
-
     const id: string = req.params.id;
-Report
+
     try {
         const query = { _id: new ObjectId(id) };
         const result = await collections.Reports?.updateOne(query, { $set: req.body });
-        
-        console.log(result);
 
         if (result && result.matchedCount) {
-            res.status(200).send(`Updated Report with id ${id}`);
+            return res.status(200).json({
+                message: "Report updated successfully",
+                id
+            });
         } else if (!result?.matchedCount) {
-            res.status(404).send(`Report with id ${id} not found`);
+            return res.status(404).json({ message: `Report with id ${id} not found` });
         } else {
-            res.status(304).send(`Report with id: ${id} not updated`);
+            return res.status(304).json({ message: `Report with id ${id} not updated` });
         }
     } catch (error) {
-        if (error instanceof Error)
-            {
-                console.log(`issue with inserting ${error.message}`);
-            }
-            else{
-                console.log(`error with ${error}`)
-            }
-            res.status(500).send(`Unable to update Report ${id}`);
-        }
-
- 
+        return res.status(500).json({ message: `Unable to update Report ${id}` });
+    }
 };
 
 export const deleteReport = async(req: Request, res: Response) => {

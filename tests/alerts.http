@@ -32,3 +32,24 @@ content-type: application/json
 x-api-key: blahblah
 
 ###
+
+GET {{userendpoint}}/691dc4dfdb10fa288070a096 HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+###
+PUT {{userendpoint}}/691dc4dfdb10fa288070a096 HTTP/1.1
+content-type: application/json
+//x-api-key: blahblah
+
+{
+  "severity": "High",
+  "category": "Fire",
+  "notes": "2 detected in the server room.",
+  "timestamp": "2025-11-19T14:30:00Z",
+  "location": {
+    "lat": 53.3498,
+    "lng": -6.2603,
+    "address": "123 Main St, Dublin"
+  }
+}
