@@ -30,7 +30,7 @@ export const updatealertSchema = z.object({
 
 export interface Report {
     _id?: ObjectId;
-    severity: 'Low' | 'Moderate' | 'High' | 'Info';
+    severity: 'Low' | 'Moderate' | 'High' | 'Info' | 'Urgent';
     category: string;
     notes?: string;
     timestamp: string;
@@ -38,7 +38,7 @@ export interface Report {
 }
 
 export const createReportSchema = z.object({
-    severity: z.enum(['Low', 'Moderate', 'High', 'Info']),
+    severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']),
     category: z.string().min(1),
     notes: z.string().min(1).optional(),
     timestamp: z.string().min(1),       
@@ -50,7 +50,7 @@ export const createReportSchema = z.object({
 });
 
 export const updateReportSchema = z.object({
-    severity: z.enum(['Low', 'Moderate', 'High', 'Info']).optional(),
+    severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']).optional(),
     category: z.string().min(1).optional(),
     notes: z.string().min(1).optional(),
     timestamp: z.string().min(1).optional(),
