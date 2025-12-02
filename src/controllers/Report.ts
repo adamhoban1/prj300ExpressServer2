@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
+import { ca } from 'zod/v4/locales';
 
 export const getReports = async (req: Request, res: Response) => {
   try {
 
-    const Report = (await collections.Reports?.find({}).toArray()) as unknown as Report[];
-    if (Report) {
-      res.status(200).send(Report);
+    const reports = (await collections.Reports?.find({}).toArray()) as unknown as Report[];
+    if (reports) {
+      res.status(200).send(reports);
     }
     else {
       res.status(500).send("Failed to get Report.");
@@ -32,10 +33,10 @@ export const getReportById = async (req: Request, res: Response) => {
   let id: string = req.params.id;
   try {
     const query = { _id: new ObjectId(id) };
-    const Report = (await collections.Reports?.findOne(query)) as unknown as Report;
+    const report = (await collections.Reports?.findOne(query)) as unknown as Report;
 
-    if (Report) {
-      res.status(200).send(Report);
+    if (report) {
+      res.status(200).send(report);
     }
     else {
       res.status(404).send(`Unable to find matching document with id: ${req.params.id}`);
@@ -90,7 +91,14 @@ export const updateReport = async (req: Request, res: Response) => {
 
     try {
         const query = { _id: new ObjectId(id) };
-        const result = await collections.Reports?.updateOne(query, { $set: req.body });
+        const reportUpdated = {
+          severity: req.body.severity,
+          category: req.body.category,
+          notes: req.body.notes,
+          location: req.body.location,
+          timestamp: req.body.timestamp,
+        }
+        const result = await collections.Reports?.updateOne(query, { $set: reportUpdated });
 
         if (result && result.matchedCount) {
             return res.status(200).json({

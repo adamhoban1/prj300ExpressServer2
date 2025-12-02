@@ -40,7 +40,7 @@ export interface Report {
 export const createReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']),
     category: z.string().min(1),
-    notes: z.string().min(1).optional(),
+    notes: z.string().min(0).optional(),
     timestamp: z.string().min(1),       
     location: z.object({
         lat: z.number().optional(),
