@@ -1,41 +1,35 @@
-PR300
-Emergency Alert App – Backend API
-Group
+# PR300
+## Emergency Alert App – Backend API
+### Group
+- Adam Hoban
+- Adam Fay
+- Kyle Flynn
 
-Adam Hoban
-
-Adam Fay
-
-Kyle Flynn
-
-Current Tech Used
-
+# Current Tech Used
 Runtime: Node.js
-
 Framework: Express.js
-
 Database: MongoDB
-
-Authentication: JWT (JSON Web Tokens)
-
 Environment Config: dotenv
-
 Express Backend API
 
-Documentation
+## Documentation
 
 Express.js: https://expressjs.com/
 
 MongoDB: https://www.mongodb.com/docs/
 
-Installation
+## Installation
 1. Navigate to the backend project directory
+```bash
 cd prj300ExpressServer2
+```
 
 2. Install dependencies
+```bash
 npm install
+```
 
-Environment Variables
+### Environment Variables
 
 Create a .env file in the root directory and add the following:
 
@@ -45,10 +39,12 @@ DB_NAME= YOUR_NAME
 
 Running the Server
 Development mode
+```bash
 npm run dev
+```
 
 
 
-The API will run at:
+### The API will run at:
 
 http://localhost:3000
