@@ -35,6 +35,8 @@ export interface Report {
     notes?: string;
     timestamp: string;
     location: { lat?: number; lng?: number; address?: string };
+    source?: 'USER' | 'MET_EIREANN';
+    externalId?: string;
 }
 
 export const createReportSchema = z.object({
@@ -46,7 +48,9 @@ export const createReportSchema = z.object({
         lat: z.number().optional(),
         lng: z.number().optional(),
         address: z.string().min(1).optional()
-    })
+    }),
+    source: z.enum(['USER', 'MET_EIREANN']).optional(),
+    externalId: z.string().min(1).optional()
 });
 
 export const updateReportSchema = z.object({
@@ -58,5 +62,7 @@ export const updateReportSchema = z.object({
         lat: z.number().optional(),
         lng: z.number().optional(),
         address: z.string().min(1).optional()
-    }).optional()
+    }).optional(),
+    source: z.enum(['USER', 'MET_EIREANN']).optional(),
+    externalId: z.string().min(1).optional()
 });

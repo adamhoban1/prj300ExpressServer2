@@ -1,18 +1,19 @@
 import express, { Router } from "express";
-import { fetchWeatherWarnings } from "../services/metEireann.service";
+import { importWeatherWarnings } from "../services/metEireann.service";
 
 const router: Router = express.Router();
 
-router.get("/warnings", async (_req, res) => {
+router.post("/import", async (_req, res) => {
   try {
-    const warnings = await fetchWeatherWarnings();
+    const count = await importWeatherWarnings();
     res.json({
-      count: warnings.length,
-      warnings
+      message: "Weather warnings imported",
+      imported: count
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: "Unable to retrieve weather warnings"
+      message: "Unable to import weather warnings",
+      error: err instanceof Error ? err.message : err
     });
   }
 });
