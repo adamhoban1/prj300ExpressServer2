@@ -1,0 +1,9 @@
+@userendpoint = http://localhost:3000/api/v1/weather
+
+###
+### GET Request for weather warnings
+## Expected result is ........ it works
+
+GET {{userendpoint}}/warnings HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
