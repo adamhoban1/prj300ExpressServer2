@@ -2,6 +2,7 @@ import axios from "axios";
 import { parseStringPromise } from "xml2js";
 import { collections } from "../database";
 import { Report } from "../models/Report";
+import { sendPushNotification } from "./push.service";
 
 const MET_RSS_URL = "https://www.met.ie/warningsxml/rss.xml";
 
@@ -46,6 +47,20 @@ export const importWeatherWarnings = async (): Promise<number> => {
     };
 
     await collections.Reports.insertOne(report);
+
+    // Get all user device tokens
+    const users = await collections.users?.find(
+      { deviceToken: { $exists: true } },
+      { projection: { deviceToken: 1 } }
+    ).toArray();
+
+    const tokens = users?.map(u => u.deviceToken).filter(Boolean) || [];
+
+    await sendPushNotification(
+      tokens,
+      "⚠️ Weather Warning",
+      report.notes || "New Met Éireann weather alert"
+    );
     imported++;
   }
 
