@@ -1,0 +1,15 @@
+@userendpoint = http://localhost:3000/api/v1/weather
+
+###
+### POST Request to import weather data
+## Expected result is ........ it works
+
+POST {{userendpoint}}/import HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+###
+
+POST {{userendpoint}}/import HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
