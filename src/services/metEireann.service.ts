@@ -5,10 +5,9 @@ import { Report } from "../models/Report";
 
 const MET_RSS_URL = "https://www.met.ie/warningsxml/rss.xml";
 
-/**
- * Imports weather warnings from Met Éireann RSS feed
- * and inserts them as Reports into MongoDB.
- */
+
+ //Imports weather warnings from Met Éireann RSS feed and inserts them as Reports into MongoDB.
+
 export const importWeatherWarnings = async (): Promise<number> => {
   if (!collections.Reports) {
     throw new Error("Reports collection not initialised");
@@ -26,7 +25,7 @@ export const importWeatherWarnings = async (): Promise<number> => {
   let imported = 0;
 
   for (const item of warnings) {
-    // Skip if already exists based on externalId
+    // Skip if already exists based on externalId so no duplicates
     const existing = await collections.Reports.findOne({
       externalId: item.guid
     });
