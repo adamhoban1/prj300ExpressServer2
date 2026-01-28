@@ -13,11 +13,47 @@ export const importWeatherWarnings = async (): Promise<number> => {
     throw new Error("Reports collection not initialised");
   }
 
-  const response = await axios.get(MET_RSS_URL);
-  const parsed = await parseStringPromise(response.data, {
-    explicitArray: false
-  });
+  let rssXml: string;
 
+  try {
+    const response = await axios.get(MET_RSS_URL);
+    rssXml = response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        throw new Error(
+          `Failed to fetch Met Éireann RSS feed: received HTTP ${error.response.status} ${error.response.statusText}`
+        );
+      }
+      if (error.request) {
+        throw new Error(
+          "Failed to fetch Met Éireann RSS feed: no response received from Met Éireann server"
+        );
+      }
+      throw new Error(
+        `Failed to fetch Met Éireann RSS feed: ${error.message}`
+      );
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    throw new Error(
+      `Failed to fetch Met Éireann RSS feed: ${message}`
+    );
+  }
+
+  let parsed: any;
+  try {
+    parsed = await parseStringPromise(rssXml, {
+      explicitArray: false
+    });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unknown XML parsing error";
+    throw new Error(
+      `Failed to parse Met Éireann RSS feed XML: ${message}`
+    );
+  }
   // Handle single or multiple items
   const items = parsed.rss.channel.item || [];
   const warnings = Array.isArray(items) ? items : [items];
