@@ -5,6 +5,44 @@ import { Report } from "../models/Report";
 
 const MET_RSS_URL = "https://www.met.ie/warningsxml/rss.xml";
 
+interface RSSItem {
+  guid?: string;
+  description?: string;
+  pubDate?: string;
+  title?: string;
+}
+
+/**
+ * Validates that an RSS feed item has all required fields and they are in the expected format.
+ * @param item - The RSS feed item to validate
+ * @returns true if the item is valid, false otherwise
+ */
+const isValidRSSItem = (item: RSSItem): boolean => {
+  // Check that all required fields exist
+  if (!item.guid || typeof item.guid !== 'string' || item.guid.trim() === '') {
+    return false;
+  }
+  
+  if (!item.description || typeof item.description !== 'string') {
+    return false;
+  }
+  
+  if (!item.title || typeof item.title !== 'string' || item.title.trim() === '') {
+    return false;
+  }
+  
+  if (!item.pubDate || typeof item.pubDate !== 'string' || item.pubDate.trim() === '') {
+    return false;
+  }
+  
+  // Validate that pubDate is a valid date
+  const date = new Date(item.pubDate);
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+  
+  return true;
+};
 
  //Imports weather warnings from Met Éireann RSS feed and inserts them as Reports into MongoDB.
 
@@ -61,6 +99,12 @@ export const importWeatherWarnings = async (): Promise<number> => {
   let imported = 0;
 
   for (const item of warnings) {
+    // Validate item has all required fields in expected format
+    if (!isValidRSSItem(item)) {
+      console.warn('Skipping invalid RSS item:', JSON.stringify(item));
+      continue;
+    }
+
     // Skip if already exists based on externalId so no duplicates
     const existing = await collections.Reports.findOne({
       externalId: item.guid
