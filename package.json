@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Web3Year2025/restapiinexpress-adamhoban1#readme",
   "description": "",
   "dependencies": {
+    "argon2": "^0.44.0",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

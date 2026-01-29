@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { User } from '../models/user';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
+import { z } from 'zod';
+import * as argon2 from 'argon2';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
