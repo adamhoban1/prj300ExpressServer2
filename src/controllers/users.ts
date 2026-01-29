@@ -29,9 +29,9 @@ export const getUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   //get a single  user by ID from the database
 
-  let id: string = req.params.id;
+  let _id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const query = { _id: new ObjectId(id) };
+    const query = { _id: new ObjectId(_id) };
     const user = (await collections.users?.findOne(query)) as unknown as User;
 
     if (user) {
@@ -88,20 +88,20 @@ catch (error) {
 
 export const updateUser = async (req: Request, res: Response) => {
 
-    const id: string = req.params.id;
+    const _id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
     try {
-        const query = { _id: new ObjectId(id) };
+        const query = { _id: new ObjectId(_id) };
         const result = await collections.users?.updateOne(query, { $set: req.body });
         
         console.log(result);
 
         if (result && result.matchedCount) {
-            res.status(200).send(`Updated user with id ${id}`);
+            res.status(200).send(`Updated user with id ${_id}`);
         } else if (!result?.matchedCount) {
-            res.status(404).send(`User with id ${id} not found`);
+            res.status(404).send(`User with id ${_id} not found`);
         } else {
-            res.status(304).send(`User with id: ${id} not updated`);
+            res.status(304).send(`User with id: ${_id} not updated`);
         }
     } catch (error) {
         if (error instanceof Error)
@@ -111,16 +111,16 @@ export const updateUser = async (req: Request, res: Response) => {
             else{
                 console.log(`error with ${error}`)
             }
-            res.status(500).send(`Unable to update user ${id}`);
+            res.status(500).send(`Unable to update user ${_id}`);
         }
 
  
 };
 
 export const deleteUser = async(req: Request, res: Response) => {
-  let id: string = req.params.id;
+  let _id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const query = { _id: new ObjectId(id) };
+    const query = { _id: new ObjectId(_id) };
     const result = await collections.users?.deleteOne(query);
 
     if (result && result.deletedCount === 1) {

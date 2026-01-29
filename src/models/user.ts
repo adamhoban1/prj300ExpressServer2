@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 export interface User {
-    id?: ObjectId;
+    _id?: ObjectId;
     username: string;
     password?: string;
     phonenumber: string;
