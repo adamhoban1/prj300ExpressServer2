@@ -14,7 +14,7 @@ content-type: application/json
     "username" : "valadationtest",
     "password" : "Password123",
    "phonenumber" : "0871233456",
-   "email": "s00253815@bing.ie"
+   "email": "s100253815@bing.ie"
 }
 
 
@@ -25,6 +25,16 @@ content-type: application/json
 GET {{userendpoint}} HTTP/1.1
 content-type: application/json
 x-api-key: blahblah
+
+###
+POST http://localhost:3000/api/v1/auth HTTP/3.0
+content-type: application/json
+x-api-key: blahblah
+
+{
+    "email": "s100253815@bing.ie",
+    "password": "Password123"
+}
 
 ###
 GET http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
@@ -43,8 +53,20 @@ Content-Type: application/json
 }
 
 ###
+# @name login
+POST http://localhost:3000/api/v1/auth HTTP/3.0
+content-type: application/json
+x-api-key: blahblah
 
-DELETE http://localhost:3000/api/v1/users/6913c269fcf22563cae05a18 HTTP/1.1
+{
+    "email": "s100253815@bing.ie",
+    "password": "Password123"
+}
+
+###
+@accessToken = {{login.response.body.accessToken}}
+
+DELETE http://localhost:3000/api/v1/users/691df235db1613959238b0be HTTP/1.1
 content-type: application/json
 x-api-key: blahblah HTTP/1.1
 

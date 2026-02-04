@@ -8,7 +8,7 @@ import * as argon2 from 'argon2';
 export const getUsers = async (req: Request, res: Response) => {
   try {
 
-    const users = (await collections.users?.find({}).toArray()) as unknown as User[];
+    const users = (await collections.users?.find({}).project({ hashedPassword: 0, password: 0 }).toArray()) as unknown as User[];
     if (users) {
       res.status(200).send(users);
     }
@@ -34,7 +34,7 @@ export const getUserById = async (req: Request, res: Response) => {
   let _id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const query = { _id: new ObjectId(_id) };
-    const user = (await collections.users?.findOne(query)) as unknown as User;
+    const user = (await collections.users?.findOne(query, { projection: { hashedPassword: 0, password: 0 } })) as unknown as User;
 
     if (user) {
       res.status(200).send(user);
@@ -61,11 +61,18 @@ export const createUser = async (req: Request, res: Response) => {
 console.log(req.body); //for now still log the data
 const {username, password, phonenumber, email} = req.body;
 
-const newUser : User = {username: username, password: password, phonenumber: phonenumber, email: email, dateJoined: new Date()};
-
-
 try {
-  const result = await collections.users?.insertOne(newUser)
+  const existingUser = await collections.users?.findOne({ email: req.body.email })
+
+  if (existingUser) {
+    res.status(400).json({ "error": "existing email" });
+    return;
+  }
+
+const newUser : User = {username: username, phonenumber: phonenumber, email: email, dateJoined: new Date()};
+
+newUser.hashedPassword = await argon2.hash(req.body.password)
+const result = await collections.users?.insertOne(newUser)
 
 if (result) {
   res.status(201).location(`${result.insertedId}`).json({ message: `Created a new user with id ${result.insertedId}` })
