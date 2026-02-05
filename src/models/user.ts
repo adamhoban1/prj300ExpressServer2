@@ -2,9 +2,10 @@ import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 export interface User {
-    id?: ObjectId;
+    _id?: ObjectId;
     username: string;
     password?: string;
+    hashedPassword?: string;
     phonenumber: string;
     email: string;
     dateJoined?: Date;
@@ -12,14 +13,14 @@ export interface User {
 
 export const createUserSchema = z.object({
     username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/), // Letters, spaces and numbers
-    password: z.string().min(6),
+    password: z.string().min(6).max(64),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/),
     phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/), // E.164 format 
     email: z.email()
 });
 
 export const updateUserSchema = z.object({
   username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(), // Only letters and spaces
-    password: z.string().min(6).optional(),
+    password: z.string().min(6).max(64).optional(),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)
     phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(), // E.164 format 
     email: z.email().optional()
 });

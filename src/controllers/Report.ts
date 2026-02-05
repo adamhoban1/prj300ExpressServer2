@@ -30,7 +30,7 @@ export const getReports = async (req: Request, res: Response) => {
 export const getReportById = async (req: Request, res: Response) => {
   //get a single  Report by ID from the database
 
-  let id: string = req.params.id;
+  let id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const query = { _id: new ObjectId(id) };
     const report = (await collections.Reports?.findOne(query)) as unknown as Report;
@@ -87,7 +87,7 @@ catch (error) {
 
 
 export const updateReport = async (req: Request, res: Response) => {
-    const id: string = req.params.id;
+    const id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
     try {
         const query = { _id: new ObjectId(id) };
@@ -116,7 +116,7 @@ export const updateReport = async (req: Request, res: Response) => {
 };
 
 export const deleteReport = async(req: Request, res: Response) => {
-  let id: string = req.params.id;
+  let id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const query = { _id: new ObjectId(id) };
     const result = await collections.Reports?.deleteOne(query);
