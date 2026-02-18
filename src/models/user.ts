@@ -1,3 +1,4 @@
+// models/user.ts
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 
@@ -9,18 +10,28 @@ export interface User {
     phonenumber: string;
     email: string;
     dateJoined?: Date;
+    // NEW: Cognito fields
+    cognitoId?: string;  // Links to Cognito user
+    lastLogin?: Date;
 }
 
 export const createUserSchema = z.object({
-    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/), // Letters, spaces and numbers
-    password: z.string().min(6).max(64),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/),
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/), // E.164 format 
-    email: z.email()
+    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/),
+    password: z.string().min(6).max(64),
+    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/),
+    email: z.string().email()
 });
 
 export const updateUserSchema = z.object({
-  username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(), // Only letters and spaces
-    password: z.string().min(6).max(64).optional(),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(), // E.164 format 
-    email: z.email().optional()
+    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(),
+    password: z.string().min(6).max(64).optional(),
+    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(),
+    email: z.string().email().optional()
+});
+
+// NEW: Schema for Cognito user sync
+export const cognitoUserSchema = z.object({
+    cognitoId: z.string(),
+    email: z.string().email(),
+    username: z.string().optional()
 });
