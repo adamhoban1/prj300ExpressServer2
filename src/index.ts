@@ -4,6 +4,7 @@ import userRoutes from "./Routes/users";//import user routes
 import alertRoutes from "./Routes/alert";//import alert routes
 import weatherRoutes from "./Routes/weather";
 import authRoutes from "./Routes/auth";
+import defibRoutes from "./Routes/defib";
 import dotenv from "dotenv";
 import { initDb } from "./database";
 import { authenticateKey } from "./middleware/auth.middleware";
@@ -23,6 +24,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api/v1/users", userRoutes );//api base path
 app.use("/api/v1/alert", alertRoutes );//api base path
+app.use("/api/v1/defibs", defibRoutes);//api base path
 app.use("/api/v1/weather", weatherRoutes);
 app.use('/api/v1/auth', authRoutes)
 
