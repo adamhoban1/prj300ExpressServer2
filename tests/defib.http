@@ -1,0 +1,35 @@
+# Get all defibs
+GET http://localhost:3000/api/v1/defibs
+Content-Type: application/json
+x-api-key: blahblah
+
+###
+
+# Get defib by ID (replace <id> with a valid ObjectId)
+GET http://localhost:3000/api/v1/defibs/1
+x-api-key: blahblah
+Content-Type: application/json
+
+###
+
+# Create a new defib
+POST http://localhost:3000/api/v1/defibs
+x-api-key: blahblah
+Content-Type: application/json
+
+{
+    "working": true,
+    "timestamp": "2025-11-19T14:30:00Z",
+    "location": {
+        "lat": 53.3498,
+        "lng": -6.2603,
+        "address": "Dublin, Ireland"
+    },
+    "accessInstructions": "Accessible 24/7",
+}
+
+
+# Delete defib (replace <id> with a valid ObjectId)
+DELETE http://localhost:3000/api/v1/defibs/<id>
+x-api-key: blahblah
+Content-Type: application/json
