@@ -1,4 +1,5 @@
 import express, {Application, Request, Response} from "express" ;//test
+import bodyParser from "body-parser";
 import morgan from "morgan";
 import userRoutes from "./Routes/users";//import user routes
 import alertRoutes from "./Routes/alert";//import alert routes
@@ -19,6 +20,10 @@ const PORT = process.env.PORT || 3001;
 
 
 const app: Application = express();
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
