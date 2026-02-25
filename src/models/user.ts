@@ -4,23 +4,32 @@ import { z } from "zod";
 export interface User {
     _id?: ObjectId;
     username: string;
+    phonenumber?: string;
+    email: string;
     password?: string;
     hashedPassword?: string;
-    phonenumber: string;
-    email: string;
     dateJoined?: Date;
+    cognitoId?: string;// Links to Cognito user
+    lastLogin?: Date;
 }
 
 export const createUserSchema = z.object({
-    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/), // Letters, spaces and numbers
-    password: z.string().min(6).max(64),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/),
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/), // E.164 format 
-    email: z.email()
+    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/),
+    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(),
+    email: z.string().email(),
+    cognitoId: z.string().optional()
 });
 
 export const updateUserSchema = z.object({
-  username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(), // Only letters and spaces
-    password: z.string().min(6).max(64).optional(),//.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)
-    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(), // E.164 format 
-    email: z.email().optional()
+    username: z.string().min(1).regex(/^[a-zA-ZÀ-ÿ0-9'_-]+$/).optional(),
+    phonenumber: z.string().regex(/^(?:\+353|0)87\d{7}$/).optional(),
+    email: z.string().email().optional(),
+    cognitoId: z.string().optional()
+});
+
+
+export const cognitoUserSchema = z.object({
+    cognitoId: z.string(),
+    email: z.string().email(),
+    username: z.string().optional()
 });

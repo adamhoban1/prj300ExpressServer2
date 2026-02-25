@@ -1,72 +1,158 @@
 @userendpoint = http://localhost:3000/api/v1/users
-
-###
-### POST Request for a user
-## Expected result is ........ it works
-
-
-
-POST {{userendpoint}} HTTP/1.1
-content-type: application/json
-//x-api-key: blahblah
-
-{
-    "username" : "valadationtest",
-    "password" : "Password123",
-   "phonenumber" : "0871233456",
-   "email": "s100253815@bing.ie"
-}
-
+@testUserId = 699f2eba6339a7909675e1fd
+@cognitoToken = eyJraWQiOiJXS1YxdUx0TEFiSkQ5dGEzcTR0YUdpdDFOTTY2Smt0SE05Y2tHdGRsRmRjPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI4MjE1NDRiNC03MGMxLTcwNDUtMzE0Ni0xNzg1MzI4ZjUzZjQiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfdHp0Z1Yzc2hUIiwiY29nbml0bzp1c2VybmFtZSI6IjgyMTU0NGI0LTcwYzEtNzA0NS0zMTQ2LTE3ODUzMjhmNTNmNCIsIm9yaWdpbl9qdGkiOiI5Nzk3MmE2Yy1lNzc1LTQxZjYtYTg4Ny05MmM3NzI1YTZkYmIiLCJhdWQiOiI3ZGEyZ211bjNwdWswbGg1b3JkNWI2ZjV2aiIsImV2ZW50X2lkIjoiNDRmMTBlMzQtNDhhNi00Y2ZkLTkzMjYtNWI5ZTk0MmY5ODljIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3NzIwNTQxOTAsIm5pY2tuYW1lIjoidGVzdCIsImV4cCI6MTc3MjA1Nzc5MCwiaWF0IjoxNzcyMDU0MTkxLCJqdGkiOiJjNGRiNjE2MC1jYmEzLTQ1NmMtYjc5My1kODM5NTMyZmY5YTYiLCJlbWFpbCI6InByajMwMEBwcm90b24ubWUifQ.fuCzt0c1pA4N8b4MZJUXtiztiHYw-_lGjoZZ-rooQekoGaR7Bjb78nSziavqvcim7-iYN0krWp4TVG4_roWRQOMhqs-NXUElyI2rs9adXkXWAHMNieku1bRIiyQNAqCw-FXdWBPM1RU5behAFnptPdReoyQRn5LWOEugEO80jQ283ehTyLBWaz79bhPZER5VrcgLoDUz35J25oJqKhw17M3U4lbs2ympBVGkO1dqsFtldn_thi0ayUJsP2Q8Utpslbtu8Gxe9kiM8GvFwvjW3Pas1rnXkS5sO4SwABFk7oGPMrrA8xU5aqSI2C72jCytkR8TL73qXXvDkS3FF23UyQ
 
 
 
 
 ###
+### GET All Users
+## Expected result: Returns array of all users (passwords excluded)
+
 GET {{userendpoint}} HTTP/1.1
 content-type: application/json
 x-api-key: blahblah
 
 ###
-POST http://localhost:3000/api/v1/auth HTTP/3.0
+### GET User by ID
+## Expected result: Returns single user object without password fields
+
+GET {{userendpoint}}/{{testUserId}} HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+###
+### POST: Create New User
+## Expected result: Creates user with hashed password, returns 201 with user ID
+
+POST {{userendpoint}} HTTP/1.1
 content-type: application/json
 x-api-key: blahblah
 
 {
-    "email": "s100253815@bing.ie",
-    "password": "Password123"
+    "username": "validationtest",
+    "cognitoId": "821544b4-70c1-7045-3146-1785328f53f4",
+    "phonenumber": "0871233456",
+    "email": "11381deddd15@bing.ie"
 }
 
 ###
-GET http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
+### POST: Create User with Duplicate Email
+## Expected result: Should fail with 400 "existing email" error
+
+POST {{userendpoint}} HTTP/1.1
 content-type: application/json
 x-api-key: blahblah
 
-### POST: Create user with invalid phone number (should fail validation)
-PUT http://localhost:3000/api/v1/users/6914667106d8b5a97ab2388a HTTP/1.1
+{
+    "username": "duplicate",
+    "cognitoId": "us-east-1:duplicate-cognito-id",
+    "phonenumber": "0871234567",
+    "email": "s100253815@bing.ie"
+}
+
+###
+### POST: Create User with Invalid Phone Number
+## Expected result: Should fail validation (if middleware active)
+
+POST {{userendpoint}} HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+{
+    "username": "badphone",
+    "cognitoId": "us-east-1:badphone-cognito-id",
+    "password": "Password123",
+    "phonenumber": "123456",
+    "email": "badphone@test.ie"
+}
+
+###
+### PUT: Update User by ID
+## Expected result: Updates user fields, returns 200
+
+PUT {{userendpoint}}/{{testUserId}} HTTP/1.1
 Content-Type: application/json
-
-{
-    "username" : "bbbb",
-    "password" : "Password123",
-   "phonenumber" : "0871274675",
-   "email": "s00253815@me.com"
-}
-
-###
-# @name login
-POST http://localhost:3000/api/v1/auth HTTP/3.0
-content-type: application/json
 x-api-key: blahblah
 
 {
-    "email": "s100253815@bing.ie",
-    "password": "Password123"
+    "username": "updatedname",
+    "phonenumber": "0871274675",
+    "email": "updated@test.ie"
 }
 
 ###
-@accessToken = {{login.response.body.accessToken}}
+### DELETE: Delete User by ID
+## Expected result: Removes user, returns 200 with deletion message
 
-DELETE http://localhost:3000/api/v1/users/691df235db1613959238b0be HTTP/1.1
+DELETE {{userendpoint}}/691462eb0a73737c0ae4b2d9 HTTP/1.1
 content-type: application/json
-x-api-key: blahblah HTTP/1.1
+x-api-key: blahblah
+
+###
+### ============================================
+### COGNITO-BASED AUTHENTICATED ROUTES
+### ============================================
+
+###
+### POST: Sync Cognito User to MongoDB
+## Expected result: Creates or updates user based on Cognito JWT, syncs lastLogin
+## Requires: Valid Cognito access token in Authorization header
+## has to be from the CognitoIdentityServiceProvider.7da2gmun3puk0lh5ord5b6f5vj.821544b4-70c1-7045-3146-1785328f53f4.idToken in the response of the login route in the auth.http file
+
+POST {{userendpoint}}/cognito/sync HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+
+{
+    "cognitoId": "prj300@proton.me",
+    "email": "prj300@proton.me"  
+}
+
+###
+### GET: Get Current User Profile (Cognito)
+## Expected result: Returns authenticated user's profile (no password fields)
+## Requires: Valid Cognito access token
+
+GET {{userendpoint}}/cognito/me HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+
+###
+### PUT: Update Current User Profile (Cognito)
+## Expected result: Updates username/phonenumber with validation, returns updated profile
+## Requires: Valid Cognito access token
+
+PUT {{userendpoint}}/cognito/me HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+
+{
+    "username": "newusername",
+    "phonenumber": "0871234567"
+}
+
+###
+### PUT: Update Current User Profile - Invalid Username
+## Expected result: Should fail with 400 "Invalid username format"
+
+PUT {{userendpoint}}/cognito/me HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+
+{
+    "username": "invalid@user!"
+}
+
+###
+### PUT: Update Current User Profile - Invalid Phone
+## Expected result: Should fail with 400 "Invalid phone number format"
+
+PUT {{userendpoint}}/cognito/me HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+
+{
+    "phonenumber": "123"
+}
 

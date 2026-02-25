@@ -4,6 +4,7 @@ import { collections } from '../database';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import * as argon2 from 'argon2';
+import { AuthRequest } from '../middleware/cognitoAuth';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
@@ -59,7 +60,7 @@ export const createUser = async (req: Request, res: Response) => {
   // create a new user in the database
 
 console.log(req.body); //for now still log the data
-const {username, password, phonenumber, email} = req.body;
+const {username, cognitoId, phonenumber, email} = req.body;
 
 try {
   const existingUser = await collections.users?.findOne({ email: req.body.email })
@@ -69,9 +70,9 @@ try {
     return;
   }
 
-const newUser : User = {username: username, phonenumber: phonenumber, email: email, dateJoined: new Date()};
+const newUser : User = {username: username, cognitoId: cognitoId, phonenumber: phonenumber, email: email, dateJoined: new Date()};
 
-newUser.hashedPassword = await argon2.hash(req.body.password)
+
 const result = await collections.users?.insertOne(newUser)
 
 if (result) {
@@ -144,5 +145,151 @@ export const deleteUser = async(req: Request, res: Response) => {
       console.log(`error with ${error}`);
     }
     res.status(500).send(`Unable to delete user ${req.params.id}`);
+  }
+};
+
+
+export const syncCognitoUser = async (req: AuthRequest, res: Response): Promise<void> => {// this checks if a user with the Cognito ID exists in our database, creates them if not, and updates their last login time and email on every login
+  try {
+    const cognitoId = req.user?.sub;
+    const email = req.user?.email;
+    const cognitoUsername = req.user?.['cognito:username'];
+
+    if (!cognitoId || !email) {
+      res.status(400).json({ error: 'Missing user information from Cognito token' });
+      return;
+    }
+
+    if (!collections.users) {
+      res.status(500).json({ error: 'Database not initialized' });
+      return;
+    }
+
+    const user = await collections.users.findOne({ cognitoId });
+
+    if (!user) {
+      const newUser: User = {
+        cognitoId,
+        email,
+        username: cognitoUsername || email.split('@')[0],
+        phonenumber: '',
+        dateJoined: new Date(),
+        lastLogin: new Date()
+      };
+
+      const result = await collections.users.insertOne(newUser);
+
+      res.json({
+        success: true,
+        user: { ...newUser, _id: result.insertedId },
+        isNewUser: true
+      });
+      return;
+    }
+
+    await collections.users.updateOne(
+      { cognitoId },
+      {
+        $set: {
+          lastLogin: new Date(),
+          email
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      user,
+      isNewUser: false
+    });
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getCurrentUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {// this returns the authenticated user's profile based on the Cognito token
+  try {
+    const cognitoId = req.user?.sub;
+
+    if (!cognitoId) {
+      res.status(400).json({ error: 'Invalid user token' });
+      return;
+    }
+
+    if (!collections.users) {
+      res.status(500).json({ error: 'Database not initialized' });
+      return;
+    }
+
+    const user = await collections.users.findOne({ cognitoId });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found in database' });
+      return;
+    }
+
+    const { password, hashedPassword, ...safeUser } = user as any;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateCurrentUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {// this allows the authenticated user to update their username and phone number with validation
+  try {
+    const cognitoId = req.user?.sub;
+
+    if (!cognitoId) {
+      res.status(400).json({ error: 'Invalid user token' });
+      return;
+    }
+
+    if (!collections.users) {
+      res.status(500).json({ error: 'Database not initialized' });
+      return;
+    }
+
+    const { username, phonenumber } = req.body;
+    const allowedUpdates: any = {};
+
+    if (username) {
+      if (!/^[a-zA-ZÀ-ÿ0-9'_-]+$/.test(username)) {
+        res.status(400).json({ error: 'Invalid username format' });
+        return;
+      }
+      allowedUpdates.username = username;
+    }
+
+    if (phonenumber) {
+      if (!/^(?:\+353|0)87\d{7}$/.test(phonenumber)) {
+        res.status(400).json({ error: 'Invalid phone number format' });
+        return;
+      }
+      allowedUpdates.phonenumber = phonenumber;
+    }
+
+    if (Object.keys(allowedUpdates).length === 0) {
+      res.status(400).json({ error: 'No valid fields to update' });
+      return;
+    }
+
+    const result = await collections.users.findOneAndUpdate(
+      { cognitoId },
+      { $set: allowedUpdates },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password, hashedPassword, ...safeUser } = result as any;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
