@@ -63,13 +63,12 @@ export const createReport = async (req: Request, res: Response) => {
 
   const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
 
-
   try {
     let imageUrl = "";
-          if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
-            imageUrl = await uploadImage(photoUrl, "defibs");
-          }
-    const result = await collections.Reports?.insertOne(newReport)
+    if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
+      imageUrl = await uploadImage(photoUrl, "defibs");
+    }
+    const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl});
   if (result) {
     res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
   }
