@@ -3,6 +3,8 @@ import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
 import { notifyNearbyUsers } from "../services/notification.service";
+import { ca } from 'zod/v4/locales';
+import { uploadImage } from '../services/s3.service';
 
 export const getReports = async (req: Request, res: Response) => {
   try {
@@ -76,6 +78,18 @@ try {
         { reportId: result.insertedId.toString() }
       );
     }
+  console.log(req.body); //for now still log the data
+  const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
+
+  const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
+
+  try {
+    let imageUrl = "";
+    if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
+      imageUrl = await uploadImage(photoUrl, "defibs");
+    }
+    const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl});
+  if (result) {
     res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
   }
   else {

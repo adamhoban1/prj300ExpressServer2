@@ -5,10 +5,10 @@ import { z } from "zod";
 export interface User {
     _id?: ObjectId;
     username: string;
+    phonenumber?: string;
+    email: string;
     password?: string;
     hashedPassword?: string;
-    phonenumber: string;
-    email: string;
     dateJoined?: Date;
     //Notification fields
     fcmToken?: string;
