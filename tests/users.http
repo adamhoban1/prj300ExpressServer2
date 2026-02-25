@@ -8,7 +8,7 @@
 
 POST {{userendpoint}} HTTP/1.1
 content-type: application/json
-//x-api-key: blahblah
+x-api-key: blahblah
 
 {
     "username" : "valadationtest",
@@ -16,11 +16,6 @@ content-type: application/json
    "phonenumber" : "0871233456",
    "email": "s100253815@bing.ie"
 }
-
-
-
-
-
 ###
 GET {{userendpoint}} HTTP/1.1
 content-type: application/json
@@ -69,4 +64,21 @@ x-api-key: blahblah
 DELETE http://localhost:3000/api/v1/users/691df235db1613959238b0be HTTP/1.1
 content-type: application/json
 x-api-key: blahblah HTTP/1.1
+
+### POST: Create user with FCM token and GeoJSON location for notification testing
+POST {{userendpoint}} HTTP/1.1
+content-type: application/json
+x-api-key: blahblah
+
+{
+    "username": "fcmtestuser",
+    "password": "Password123",
+    "phonenumber": "0871234567",
+    "email": "fcmtestuser@example.com",
+    "fcmToken": "e_M_FmEBSS2C7ZjATcpYZU:APA91bHFBprdT75Djy4tRocxpm4IlmvraZJNZx29c30halyByu5Udt96LBFESleoCdOwhm-PVYMS5B664mZWPSDVcuj7sFKvklO5Asoi0dP5WqFAcGXxwMU",
+    "location": {
+        "type": "Point",
+        "coordinates": [-8.2995, 53.9636]
+    }
+}
 

@@ -6,6 +6,20 @@ import { User } from '../models/user';
 
 const router: Router = express.Router();
 
+router.post('/', async (req, res) => {
+  try {
+    const user = req.body;
+    const result = await collections.users?.insertOne(user);
+    if (!result) {
+      res.status(500).json({ error: 'Failed to insert user' });
+      return;
+    }
+    res.status(201).json({ insertedId: result.insertedId });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create user', details: error });
+  }
+});
+
 // Sync user from Cognito to MongoDB
 router.post('/sync', verifyCognitoToken, async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -33,6 +47,8 @@ router.post('/sync', verifyCognitoToken, async (req: AuthRequest, res: Response)
                 email,
                 username: cognitoUsername || email.split('@')[0],
                 phonenumber: '',
+                fcmToken: '',
+                location: { type: "Point", coordinates: [0, 0] },
                 dateJoined: new Date(),
                 lastLogin: new Date()
             };

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
-import { ca } from 'zod/v4/locales';
+import { notifyNearbyUsers } from "../services/notification.service";
 
 export const getReports = async (req: Request, res: Response) => {
   try {
@@ -65,24 +65,34 @@ const newReport : Report = {category: category, severity: severity, notes: notes
 
 try {
   const result = await collections.Reports?.insertOne(newReport)
-if (result) {
-  res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
-}
-else {
-  res.status(500).send("Failed to create a new Report.");
-}
-}
-catch (error) {
-  if (error instanceof Error) 
-    { 
-      console.log(`Unable to create new Report ${error.message}`);
+  if (result) {
+    // If report made succesfully pass info to notify all users nearby the report location
+    if (newReport.location?.lat && newReport.location?.lng) {
+      await notifyNearbyUsers(
+        [newReport.location.lng, newReport.location.lat],
+        5000, // radius in meters 50km in km
+        `${newReport.category} | ${newReport.severity}`,
+        `${newReport.notes || 'No additional notes provided.'}`,
+        { reportId: result.insertedId.toString() }
+      );
     }
-    else{
-      console.log(`error with ${error}`)
-    }
-    res.status(400).send(`Unable to create new Report ${req.params.id}`);
+    res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
   }
-};
+  else {
+    res.status(500).send("Failed to create a new Report.");
+  }
+  }
+  catch (error) {
+    if (error instanceof Error) 
+      { 
+        console.log(`Unable to create new Report ${error.message}`);
+      }
+      else{
+        console.log(`error with ${error}`)
+      }
+      res.status(400).send(`Unable to create new Report ${req.params.id}`);
+    }
+  };
 
 
 

@@ -16,11 +16,13 @@ content-type: application/json
   "notes": "Smoke detected in the server room.",
   "timestamp": "2025-11-19T14:30:00Z",
   "location": {
-    "lat": 53.3498,
-    "lng": -6.2603,
+    "lat": 53.9636,
+    "lng": -8.2995,
     "address": "123 Main St, Dublin"
   }
 }
+
+//-8.2995, 53.9636
 
 
 
@@ -48,8 +50,8 @@ content-type: application/json
   "notes": "2 detected in the server room.",
   "timestamp": "2025-11-19T14:30:00Z",
   "location": {
-    "lat": 53.3498,
-    "lng": -6.2603,
+    "lat": 53.9636,
+    "lng": -8.2995,
     "address": "123 Main St, Dublin"
   }
 }
