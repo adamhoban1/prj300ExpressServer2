@@ -1,9 +1,11 @@
 import express, {Application, Request, Response} from "express" ;//test
+import bodyParser from "body-parser";
 import morgan from "morgan";
 import userRoutes from "./Routes/users";//import user routes
 import alertRoutes from "./Routes/alert";//import alert routes
 import weatherRoutes from "./Routes/weather";
 import authRoutes from "./Routes/auth";
+import defibRoutes from "./Routes/defib";
 import dotenv from "dotenv";
 import { initDb } from "./database";
 import { authenticateKey } from "./middleware/auth.middleware";
@@ -18,11 +20,16 @@ const PORT = process.env.PORT || 3001;
 
 
 const app: Application = express();
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api/v1/users", userRoutes );//api base path
 app.use("/api/v1/alert", alertRoutes );//api base path
+app.use("/api/v1/defibs", defibRoutes);//api base path
 app.use("/api/v1/weather", weatherRoutes);
 app.use('/api/v1/auth', authRoutes)
 

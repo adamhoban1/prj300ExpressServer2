@@ -33,6 +33,7 @@ export interface Report {
     severity: 'Low' | 'Moderate' | 'High' | 'Info' | 'Urgent';
     category: string;
     notes?: string;
+    photoUrl?: string;
     timestamp: string;
     location: { lat?: number; lng?: number; address?: string };
     source?: 'USER' | 'MET_EIREANN';
@@ -43,6 +44,7 @@ export const createReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']),
     category: z.string().min(1),
     notes: z.string().min(0).optional(),
+    photoUrl: z.string().url().optional(),
     timestamp: z.string().min(1),       
     location: z.object({
         lat: z.number().optional(),
@@ -57,6 +59,7 @@ export const updateReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']).optional(),
     category: z.string().min(1).optional(),
     notes: z.string().min(1).optional(),
+    photoUrl: z.string().url().optional(),
     timestamp: z.string().min(1).optional(),
     location: z.object({
         lat: z.number().optional(),

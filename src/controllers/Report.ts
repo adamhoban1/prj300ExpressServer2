@@ -3,6 +3,7 @@ import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
 import { ca } from 'zod/v4/locales';
+import { uploadImage } from '../services/s3.service';
 
 export const getReports = async (req: Request, res: Response) => {
   try {
@@ -57,32 +58,35 @@ export const getReportById = async (req: Request, res: Response) => {
 export const createReport = async (req: Request, res: Response) => {
   // create a new report in the database
 
-console.log(req.body); //for now still log the data
-const {category, severity, notes, location, Reportedby} = req.body;
+  console.log(req.body); //for now still log the data
+  const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
 
-const newReport : Report = {category: category, severity: severity, notes: notes, location: location, timestamp: new Date().toISOString()};
+  const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
 
-
-try {
-  const result = await collections.Reports?.insertOne(newReport)
-if (result) {
-  res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
-}
-else {
-  res.status(500).send("Failed to create a new Report.");
-}
-}
-catch (error) {
-  if (error instanceof Error) 
-    { 
-      console.log(`Unable to create new Report ${error.message}`);
+  try {
+    let imageUrl = "";
+    if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
+      imageUrl = await uploadImage(photoUrl, "defibs");
     }
-    else{
-      console.log(`error with ${error}`)
-    }
-    res.status(400).send(`Unable to create new Report ${req.params.id}`);
+    const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl});
+  if (result) {
+    res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
   }
-};
+  else {
+    res.status(500).send("Failed to create a new Report.");
+  }
+  }
+  catch (error) {
+    if (error instanceof Error) 
+      { 
+        console.log(`Unable to create new Report ${error.message}`);
+      }
+      else{
+        console.log(`error with ${error}`)
+      }
+      res.status(400).send(`Unable to create new Report ${req.params.id}`);
+    }
+  };
 
 
 
