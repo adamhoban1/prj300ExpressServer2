@@ -60,13 +60,17 @@ export const createReport = async (req: Request, res: Response) => {
   // create a new report in the database
 
 console.log(req.body); //for now still log the data
-const {category, severity, notes, location, Reportedby} = req.body;
+const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
 
-const newReport : Report = {category: category, severity: severity, notes: notes, location: location, timestamp: new Date().toISOString()};
-
+const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
 
 try {
-  const result = await collections.Reports?.insertOne(newReport)
+  let imageUrl = "";
+    if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
+      imageUrl = await uploadImage(photoUrl, "defibs");
+    }
+    
+  const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl})
   if (result) {
     // If report made succesfully pass info to notify all users nearby the report location
     if (newReport.location?.lat && newReport.location?.lng) {
@@ -78,19 +82,6 @@ try {
         { reportId: result.insertedId.toString() }
       );
     }
-  console.log(req.body); //for now still log the data
-  const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
-
-  const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
-
-  try {
-    let imageUrl = "";
-    if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
-      imageUrl = await uploadImage(photoUrl, "defibs");
-    }
-    const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl});
-  if (result) {
-    res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
   }
   else {
     res.status(500).send("Failed to create a new Report.");

@@ -60,8 +60,7 @@ export const createUser = async (req: Request, res: Response) => {
   // create a new user in the database
 
 console.log(req.body); //for now still log the data
-const {username, password, phonenumber, email, fcmToken} = req.body;
-const {username, cognitoId, phonenumber, email} = req.body;
+const {username, password, cognitoId, phonenumber, email, fcmToken} = req.body;
 
 try {
   const existingUser = await collections.users?.findOne({ email: req.body.email })
@@ -71,9 +70,7 @@ try {
     return;
   }
 
-const newUser : User = {username: username, phonenumber: phonenumber, email: email, fcmToken: fcmToken, dateJoined: new Date()};
-const newUser : User = {username: username, cognitoId: cognitoId, phonenumber: phonenumber, email: email, dateJoined: new Date()};
-
+const newUser : User = {username: username, cognitoId: cognitoId,phonenumber: phonenumber, email: email, fcmToken: fcmToken, dateJoined: new Date()};
 
 const result = await collections.users?.insertOne(newUser)
 
