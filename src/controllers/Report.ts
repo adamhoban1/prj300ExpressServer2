@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
+import { notifyNearbyUsers } from "../services/notification.service";
 import { ca } from 'zod/v4/locales';
 import { uploadImage } from '../services/s3.service';
 
@@ -58,19 +59,29 @@ export const getReportById = async (req: Request, res: Response) => {
 export const createReport = async (req: Request, res: Response) => {
   // create a new report in the database
 
-  console.log(req.body); //for now still log the data
-  const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
+console.log(req.body); //for now still log the data
+const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
 
-  const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
+const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
 
-  try {
-    let imageUrl = "";
+try {
+  let imageUrl = "";
     if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {
       imageUrl = await uploadImage(photoUrl, "defibs");
     }
-    const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl});
+    
+  const result = await collections.Reports?.insertOne({...newReport, photoUrl: imageUrl})
   if (result) {
-    res.status(201).location(`${result.insertedId}`).json({ message: `Created a new Report with id ${result.insertedId}` })
+    // If report made succesfully pass info to notify all users nearby the report location
+    if (newReport.location?.lat && newReport.location?.lng) {
+      await notifyNearbyUsers(
+        [newReport.location.lng, newReport.location.lat],
+        5000, // radius in meters 50km in km
+        `${newReport.category} | ${newReport.severity}`,
+        `${newReport.notes || 'No additional notes provided.'}`,
+        { reportId: result.insertedId.toString() }
+      );
+    }
   }
   else {
     res.status(500).send("Failed to create a new Report.");
