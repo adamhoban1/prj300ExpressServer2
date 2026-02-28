@@ -2,6 +2,9 @@ import axios from "axios";
 import { parseStringPromise } from "xml2js";
 import { collections } from "../database";
 import { Report } from "../models/Report";
+import { WeatherAlert } from "../models/weather";
+import { guid } from "zod";
+import { time } from "console";
 
 const MET_RSS_URL = "https://www.met.ie/warningsxml/rss.xml";
 
@@ -9,8 +12,8 @@ const MET_RSS_URL = "https://www.met.ie/warningsxml/rss.xml";
  //Imports weather warnings from Met Éireann RSS feed and inserts them as Reports into MongoDB.
 
 export const importWeatherWarnings = async (): Promise<number> => {
-  if (!collections.Reports) {
-    throw new Error("Reports collection not initialised");
+  if (!collections.WeatherAlerts) {
+    throw new Error("Weather Alerts collection not initialised");
   }
 
   let rssXml: string;
@@ -62,13 +65,30 @@ export const importWeatherWarnings = async (): Promise<number> => {
 
   for (const item of warnings) {
     // Skip if already exists based on externalId so no duplicates
-    const existing = await collections.Reports.findOne({
-      externalId: item.guid
+    const existing = await collections.WeatherAlerts.findOne({
+      guid: item.guid
     });
     if (existing) continue;
 
+    // Add additional fields from the guid/ cap xml file if available
+    let capData: any = {};
+    if (item.guid) {
+      try {
+        const capResponse = await axios.get(item.guid, {timeout: 5000});
+
+        // Parse CAP XML data
+        const capParsed = await parseStringPromise(capResponse.data, {
+          explicitArray: false
+        });
+        capData = capParsed;
+      } catch (error: unknown) {
+        // If CAP XML fails, continue with RSS data only
+        console.warn(`Failed to fetch or parse CAP XML for guid ${item.guid}: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    }
+
     // Map RSS fields to Report schema
-    const report: Report = {
+    /*const report: Report = {
       severity: 'Moderate', // Default, you could map based on title if you want
       category: "Weather Warning",
       notes: item.description,
@@ -78,9 +98,27 @@ export const importWeatherWarnings = async (): Promise<number> => {
       },
       source: "MET_EIREANN",
       externalId: item.guid
+    };*/
+    // Use new weather alert model to store met eirann alerst properly
+    const weatherAlert: WeatherAlert = {
+      title: item.title,
+      link: item.link,
+      description: item.description,
+      author: item.author,
+      category: item.category,
+      guid: item.guid,
+      pubDate: item.pubDate,
+      event: capData?.alert?.info?.event || undefined,
+      headline: capData?.alert?.info?.headline || undefined,
+      urgency: capData?.alert?.info?.urgency || undefined,
+      severity: capData?.alert?.info?.severity || undefined,
+      certainty: capData?.alert?.info?.certainty || undefined,
+      instruction: capData?.alert?.info?.instruction || undefined,
+      areaDesc: capData?.alert?.info?.areaDesc || undefined,
+      emmaCodes: capData?.alert?.info?.emmaCodes || undefined
     };
 
-    await collections.Reports.insertOne(report);
+    await collections.WeatherAlerts.insertOne(weatherAlert);
     imported++;
   }
 
