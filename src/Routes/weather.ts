@@ -1,7 +1,10 @@
 import express, { Router } from "express";
 import { importWeatherWarnings } from "../services/metEireann.service";
+import { getWeatherAlerts } from "../controllers/weather.controller";
 
 const router: Router = express.Router();
+
+router.get('/', getWeatherAlerts);
 
 router.post("/import", async (_req, res) => {
   try {
@@ -17,5 +20,6 @@ router.post("/import", async (_req, res) => {
     });
   }
 });
+
 
 export default router;
