@@ -113,6 +113,9 @@ export const importWeatherWarnings = async (): Promise<number> => {
       urgency: capData?.alert?.info?.urgency || undefined,
       severity: capData?.alert?.info?.severity || undefined,
       certainty: capData?.alert?.info?.certainty || undefined,
+      onset: capData?.alert?.info?.onset || undefined,
+      expires: capData?.alert?.info?.expires || undefined,
+      effective: capData?.alert?.info?.effective || undefined,
       instruction: capData?.alert?.info?.instruction || undefined,
       areaDesc: capData?.alert?.info?.areaDesc || undefined,
       emmaCodes: capData?.alert?.info?.emmaCodes || undefined

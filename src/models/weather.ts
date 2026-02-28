@@ -38,26 +38,10 @@ export const createWeatherAlert = z.object({
     urgency: z.string().min(1).optional(),
     severity: z.string().min(1).optional(),
     certainty: z.string().min(1).optional(),
+    onset: z.string().min(1).optional(),
+    expires: z.string().min(1).optional(),
+    effective: z.string().min(1).optional(),
     instruction: z.string().min(1).optional(),
     areaDesc: z.string().min(1).optional(),
     emmaCodes: z.string().min(1).optional()
-});
-
-export const updateWeatherAlertSchema = z.object({
-    title: z.string().min(1).optional(),
-    link: z.string().url().optional(),
-    description: z.string().min(1).optional(),
-    author: z.string().min(1).optional(),
-    category: z.string().min(1).optional(),
-    guid: z.string().min(1).optional(),
-    pubDate: z.string().min(1).optional(),
-    event: z.string().min(1).optional(),
-    headline: z.string().min(1).optional(),
-    urgency: z.string().min(1).optional(),
-    severity: z.string().min(1).optional(),
-    certainty: z.string().min(1).optional(),
-    instruction: z.string().min(1).optional(),
-    areaDesc: z.string().min(1).optional(),
-    emmaCodes: z.string().min(1).optional()
-    
 });
