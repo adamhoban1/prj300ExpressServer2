@@ -150,8 +150,8 @@ export const deleteUser = async(req: Request, res: Response) => {
 
 export const syncCognitoUser = async (req: AuthRequest, res: Response): Promise<void> => {// this checks if a user with the Cognito ID exists in our database, creates them if not, and updates their last login time and email on every login
   try {
-    const cognitoId = req.user?.sub;
-    const email = req.user?.email;
+    const cognitoId = req.body.cognitoId;
+    const email = req.body.email;
     const cognitoUsername = req.user?.['cognito:username'];
 
     if (!cognitoId || !email) {
