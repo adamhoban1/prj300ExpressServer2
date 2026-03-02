@@ -60,10 +60,10 @@ export const createReport = async (req: Request, res: Response) => {
   // create a new report in the database
 
 console.log(req.body); //for now still log the data
-const {category, severity, notes, location, photoUrl, Reportedby} = req.body;
+const {category, severity, notes, location, photoUrl, UserId} = req.body;
 
-const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
-
+const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString(), UserId: UserId};
+  
 try {
   let imageUrl = "";
     if (typeof photoUrl === "string" && photoUrl.startsWith("data:image/")) {

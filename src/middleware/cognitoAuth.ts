@@ -26,6 +26,7 @@ export interface AuthRequest extends Request {
     email?: string; // User's email from Cognito token
     email_verified?: boolean;// Whether the email is verified in Cognito
     'cognito:username'?: string;// The username as stored in Cognito
+    'cognito:groups'?: string[]; // The groups the user belongs to in Cognito right now its for admin
     [key: string]: any;
   };
 }
@@ -70,4 +71,13 @@ export const verifyCognitoToken = (
       next();
     }
   );
+};
+
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  const userGroups = req.user?.['cognito:groups'] || [];
+  if (!userGroups.includes('admins')) {
+    res.status(403).json({ error: 'Admin privileges required' });
+    return;
+  }
+  next();
 };
