@@ -222,7 +222,6 @@ export const getCurrentUserProfile = async (req: AuthRequest, res: Response): Pr
     }
 
     const user = await collections.users.findOne({ cognitoId });
-
     if (!user) {
       res.status(404).json({ error: 'User not found in database' });
       return;
@@ -231,7 +230,6 @@ export const getCurrentUserProfile = async (req: AuthRequest, res: Response): Pr
     const { password, hashedPassword, ...safeUser } = user as any;
     res.json(safeUser);
   } catch (error) {
-    console.error('Profile fetch error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -251,6 +249,8 @@ export const updateCurrentUserProfile = async (req: AuthRequest, res: Response):
     }
 
     const { username, phonenumber } = req.body;
+
+    const { username, phonenumber, fcmToken, location } = req.body;
     const allowedUpdates: any = {};
 
     if (username) {
@@ -267,6 +267,14 @@ export const updateCurrentUserProfile = async (req: AuthRequest, res: Response):
         return;
       }
       allowedUpdates.phonenumber = phonenumber;
+    }
+
+    if (fcmToken) {
+      allowedUpdates.fcmToken = fcmToken;
+    }
+
+    if (location) {
+      allowedUpdates.location = location;
     }
 
     if (Object.keys(allowedUpdates).length === 0) {
