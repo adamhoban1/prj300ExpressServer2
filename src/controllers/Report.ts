@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { notifyNearbyUsers } from "../services/notification.service";
 import { ca } from 'zod/v4/locales';
 import { uploadImage } from '../services/s3.service';
+import { AuthRequest } from '../middleware/cognitoAuth';
 
 export const getReports = async (req: Request, res: Response) => {
   try {
@@ -56,13 +57,19 @@ export const getReportById = async (req: Request, res: Response) => {
 };
 
 
-export const createReport = async (req: Request, res: Response) => {
+export const createReport = async (req: AuthRequest, res: Response) => {
   // create a new report in the database
 
 console.log(req.body); //for now still log the data
+
+const cognitoId = req.user?.sub; 
+
+if (!cognitoId) {
+  return res.status(401).json({ message: "Unauthorized: User ID not found in token" });
+}
 const {category, severity, notes, location, photoUrl, UserId} = req.body;
 
-const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString(), UserId: UserId};
+const newReport : Report = {cognitoId: cognitoId, category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString()};
   
 try {
   let imageUrl = "";
@@ -82,6 +89,7 @@ try {
         { reportId: result.insertedId.toString() }
       );
     }
+    res.status(201).json({ message: "Report created successfully", id: result.insertedId });
   }
   else {
     res.status(500).send("Failed to create a new Report.");
@@ -101,11 +109,28 @@ try {
 
 
 
-export const updateReport = async (req: Request, res: Response) => {
+export const updateReport = async (req: AuthRequest, res: Response) => {
     const id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const cognitoId = req.user?.sub;
+    const userGroups = req.user?.['cognito:groups'] || [];
+    const isAdmin = userGroups.includes('Admin');
+
+    if (!cognitoId) {
+        return res.status(401).json({ message: "Unauthorized: User ID not found in token" });
+    }
 
     try {
         const query = { _id: new ObjectId(id) };
+        const existingReport = (await collections.Reports?.findOne(query)) as unknown as Report;
+
+        if (!existingReport) {
+            return res.status(404).json({ message: `Report with id ${id} not found` });
+        }
+        const isOwner = existingReport.cognitoId === cognitoId;
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: "Forbidden: You do not have permission to update this report" });
+        }
         const reportUpdated = {
           severity: req.body.severity,
           category: req.body.category,
@@ -130,10 +155,28 @@ export const updateReport = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteReport = async(req: Request, res: Response) => {
+export const deleteReport = async(req: AuthRequest, res: Response) => {
   let id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const cognitoId = req.user?.sub;
+  const userGroups = req.user?.['cognito:groups'] || [];
+  const isAdmin = userGroups.includes('Admin');
+
+  if (!cognitoId) {
+    return res.status(401).json({ message: "Unauthorized: User ID not found in token" });
+  }
+
   try {
     const query = { _id: new ObjectId(id) };
+    const existingReport = (await collections.Reports?.findOne(query)) as unknown as Report;
+
+    if (!existingReport) {
+      return res.status(404).json({ message: `Report with id ${id} not found` });
+    }
+    const isOwner = existingReport.cognitoId === cognitoId;
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Forbidden: You do not have permission to delete this report" });
+    }
     const result = await collections.Reports?.deleteOne(query);
 
     if (result && result.deletedCount === 1) {

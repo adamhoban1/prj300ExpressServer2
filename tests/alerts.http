@@ -55,3 +55,32 @@ content-type: application/json
     "address": "123 Main St, Dublin"
   }
 }
+
+###
+# Create report (sets cognitoId automatically)
+POST {{userendpoint}} HTTP/1.1
+content-type: application/json
+
+{
+  "category": "Pothole",
+  "severity": "High",
+  "notes": "Large pothole on Main St",
+  "location": { "lat": 53.3498, "lng": -6.2603 }
+}
+
+# Get my reports
+GET /api/reports/my-reports
+
+# Update my report
+PUT /api/reports/507f1f77bcf86cd799439011
+{
+  "severity": "Critical"
+}
+
+# Try to update someone else's report
+PUT /api/reports/another-users-report-id
+# Returns: 403 Forbidden ❌
+
+# Delete my report
+DELETE /api/reports/507f1f77bcf86cd799439011
+# Returns: 200 Success ✅

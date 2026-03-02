@@ -29,7 +29,7 @@ export const updatealertSchema = z.object({
 
 export interface Report {
     _id?: ObjectId;
-    UserId?: string; // The ID of the user who created the report, if applicable
+    cognitoId?: string; // The ID of the user who created the report, if applicable
     severity: 'Low' | 'Moderate' | 'High' | 'Info' | 'Urgent';
     category: string;
     notes?: string;
@@ -57,8 +57,8 @@ export const createReportSchema = z.object({
 
 export const updateReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']).optional(),
-    category: z.string().min(1).optional(),
-    notes: z.string().min(1).optional(),
+    category: z.string().optional(),
+    notes: z.string().optional(),
     photoUrl: z.string().url().optional(),
     timestamp: z.string().min(1).optional(),
     location: z.object({
