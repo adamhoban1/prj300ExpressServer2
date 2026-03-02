@@ -21,12 +21,11 @@ const PORT = process.env.PORT || 3001;
 
 const app: Application = express();
 
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(bodyParser.json({ limit: '8mb' }));
+app.use(bodyParser.urlencoded({ limit: '8mb', extended: true }));
 
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json());
 app.use("/api/v1/users", userRoutes );//api base path
 app.use("/api/v1/alert", alertRoutes );//api base path
 app.use("/api/v1/defibs", defibRoutes);//api base path
