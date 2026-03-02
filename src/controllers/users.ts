@@ -248,7 +248,6 @@ export const updateCurrentUserProfile = async (req: AuthRequest, res: Response):
       return;
     }
 
-    const { username, phonenumber } = req.body;
 
     const { username, phonenumber, fcmToken, location } = req.body;
     const allowedUpdates: any = {};
