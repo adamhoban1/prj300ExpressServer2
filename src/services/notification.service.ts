@@ -30,20 +30,62 @@ export async function notifyNearbyUsers(
   body: string,
   customData: { [key: string]: string } = {}
 ): Promise<void> {
-  const usersNear = collections.users?.find({
+  const BATCH_SIZE = 500; // FCM sendAll max batch size
+  const usersCursor = collections.users?.find({
     location: {
       $near: {
         $geometry: { type: "Point", coordinates },
         $maxDistance: radius
       }
     }
-  });
-  const users = await usersNear?.toArray();
-  if (!users) return;
-  for (const user of users) {
-    if (user.fcmToken) {
-      await sendFCMNotification(user.fcmToken, title, body, customData);
+  }, { projection: { fcmToken: 1 } });
+  if (!usersCursor) return;
+
+  let batch: any[] = [];
+  while (await usersCursor.hasNext()) {
+    const user = await usersCursor.next();
+    if (user?.fcmToken) {
+      batch.push({ userId: user._id, token: user.fcmToken });
     }
+    if (batch.length === BATCH_SIZE) {
+      await sendBatch(batch, title, body, customData);
+      batch = [];
+    }
+  }
+  if (batch.length > 0) {
+    await sendBatch(batch, title, body, customData);
+  }
+}
+
+async function sendBatch(
+  batch: { userId: any, token: string }[],
+  title: string,
+  body: string,
+  data: { [key: string]: string }
+) {
+  const registrationTokens = batch.map(({ token }) => token);
+  const message = {
+    tokens: registrationTokens,
+    notification: { title, body },
+    data
+  };
+  try {
+    const response = await admin.messaging().sendEachForMulticast(message);
+    if (response.failureCount > 0) {
+      for (let i = 0; i < response.responses.length; i++) {
+        const res = response.responses[i];
+        if (!res.success && res.error &&
+          (res.error.code === 'messaging/invalid-registration-token' ||
+           res.error.code === 'messaging/registration-token-not-registered')) {
+          // Remove the invalid token from the user
+          const userId = batch[i].userId;
+          await collections.users?.updateOne({ _id: userId }, { $unset: { fcmToken: "" } });
+          console.log(`Removed invalid FCM token for user ${userId}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('FCM sendEachForMulticast batch error:', err);
   }
 }
 
