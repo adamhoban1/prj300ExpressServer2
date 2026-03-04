@@ -57,15 +57,16 @@ export const createReportSchema = z.object({
 
 export const updateReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']).optional(),
-    category: z.string().min(1).optional(),
-    notes: z.string().min(1).optional(),
-    photoUrl: z.string().url().optional(),
-    timestamp: z.string().min(1).optional(),
+    category: z.string().optional(),
+    notes: z.string().nullable().optional(),
+    photoUrl: z.string().nullable().optional(),
+    timestamp: z.string().optional(),
     location: z.object({
-        lat: z.number().optional(),
-        lng: z.number().optional(),
-        address: z.string().min(1).optional()
-    }).optional(),
-    source: z.enum(['USER', 'MET_EIREANN']).optional(),
-    externalId: z.string().min(1).optional()
+        lat: z.number().nullable().optional(),
+        lng: z.number().nullable().optional(),
+        address: z.string().optional()
+    }).nullable().optional(),
+    source: z.enum(['USER', 'MET_EIREANN']).nullable().optional(),
+    externalId: z.string().nullable().optional(),
+    UserId: z.string().nullable().optional()
 });
