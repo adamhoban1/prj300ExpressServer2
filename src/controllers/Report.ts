@@ -3,7 +3,6 @@ import { Report } from '../models/Report';
 import { collections } from '../database';
 import { ObjectId } from 'mongodb';
 import { notifyNearbyUsers } from "../services/notification.service";
-import { ca } from 'zod/v4/locales';
 import { uploadImage } from '../services/s3.service';
 
 export const getReports = async (req: Request, res: Response) => {
@@ -104,15 +103,30 @@ try {
 export const updateReport = async (req: Request, res: Response) => {
     const id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
+    console.log(req.body); 
+
+    const { category, severity, notes, location, photoUrl, UserId, timestamp, source } = req.body;
+
     try {
         const query = { _id: new ObjectId(id) };
-        const reportUpdated = {
-          severity: req.body.severity,
-          category: req.body.category,
-          notes: req.body.notes,
-          location: req.body.location,
-          timestamp: req.body.timestamp,
+
+        // Handle photo upload the same way as createReport
+        let imageUrl = photoUrl ?? '';
+        if (typeof photoUrl === 'string' && photoUrl.startsWith('data:image/')) {
+            imageUrl = await uploadImage(photoUrl, 'defibs');
         }
+
+        const reportUpdated: Partial<Report> = {
+            category,
+            severity,
+            notes: notes ?? '',
+            location,
+            photoUrl: imageUrl,
+            timestamp: timestamp ?? new Date().toISOString(),
+            UserId,
+            source
+        };
+
         const result = await collections.Reports?.updateOne(query, { $set: reportUpdated });
 
         if (result && result.matchedCount) {
@@ -126,6 +140,11 @@ export const updateReport = async (req: Request, res: Response) => {
             return res.status(304).json({ message: `Report with id ${id} not updated` });
         }
     } catch (error) {
+        if (error instanceof Error) {
+            console.log(`Unable to update Report ${error.message}`);
+        } else {
+            console.log(`error with ${error}`);
+        }
         return res.status(500).json({ message: `Unable to update Report ${id}` });
     }
 };
