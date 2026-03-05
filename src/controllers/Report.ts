@@ -4,6 +4,7 @@ import { collections } from '../database';
 import { ObjectId } from 'mongodb';
 import { notifyNearbyUsers } from "../services/notification.service";
 import { uploadImage } from '../services/s3.service';
+import { AuthRequest } from '../middleware/cognitoAuth';
 
 export const getReports = async (req: Request, res: Response) => {
   try {
@@ -59,9 +60,9 @@ export const createReport = async (req: Request, res: Response) => {
   // create a new report in the database
 
 console.log(req.body); //for now still log the data
-const {category, severity, notes, location, photoUrl, UserId} = req.body;
+const {category, severity, notes, location, photoUrl, UserId, cognitoId} = req.body;
 
-const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString(), UserId: UserId};
+const newReport : Report = {category: category, severity: severity, notes: notes, photoUrl: photoUrl, location: location, timestamp: new Date().toISOString(), UserId: UserId, cognitoId: cognitoId};
   
 try {
   let imageUrl = "";
@@ -100,72 +101,113 @@ try {
 
 
 
-export const updateReport = async (req: Request, res: Response) => {
-    const id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+export const updateReport = async (req: AuthRequest, res: Response) => {
+  const id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const cognitoId = req.user?.sub;
 
-    console.log(req.body); 
+  if (!cognitoId) {
+    res.status(400).json({ error: 'Invalid user token' });
+    return;
+  }
 
-    const { category, severity, notes, location, photoUrl, UserId, timestamp, source } = req.body;
-
-    try {
-        const query = { _id: new ObjectId(id) };
-
-        // Handle photo upload the same way as createReport
-        let imageUrl = photoUrl ?? '';
-        if (typeof photoUrl === 'string' && photoUrl.startsWith('data:image/')) {
-            imageUrl = await uploadImage(photoUrl, 'defibs');
-        }
-
-        const reportUpdated: Partial<Report> = {
-            category,
-            severity,
-            notes: notes ?? '',
-            location,
-            photoUrl: imageUrl,
-            timestamp: timestamp ?? new Date().toISOString(),
-            UserId,
-            source
-        };
-
-        const result = await collections.Reports?.updateOne(query, { $set: reportUpdated });
-
-        if (result && result.matchedCount) {
-            return res.status(200).json({
-                message: "Report updated successfully",
-                id
-            });
-        } else if (!result?.matchedCount) {
-            return res.status(404).json({ message: `Report with id ${id} not found` });
-        } else {
-            return res.status(304).json({ message: `Report with id ${id} not updated` });
-        }
-    } catch (error) {
-        if (error instanceof Error) {
-            console.log(`Unable to update Report ${error.message}`);
-        } else {
-            console.log(`error with ${error}`);
-        }
-        return res.status(500).json({ message: `Unable to update Report ${id}` });
-    }
-};
-
-export const deleteReport = async(req: Request, res: Response) => {
-  let id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const query = { _id: new ObjectId(id) };
+    
+    // First, check if report exists
+    const existingReport = (await collections.Reports?.findOne(query)) as unknown as Report;
+    
+    if (!existingReport) {
+      res.status(404).json({ message: `Report with id ${id} not found` });
+      return;
+    }
+
+    // Check if user is owner ONLY (removed admin check)
+    const isOwner = existingReport.cognitoId === cognitoId;
+    
+    if (!isOwner) {
+      res.status(403).json({ 
+        error: 'Forbidden', 
+        message: 'You can only update your own reports' 
+      });
+      return;
+    }
+
+    const reportUpdated = {
+      severity: req.body.severity,
+      category: req.body.category,
+      notes: req.body.notes,
+      location: req.body.location,
+    };
+    
+    const result = await collections.Reports?.updateOne(query, { $set: reportUpdated });
+
+    if (result && result.matchedCount) {
+      res.status(200).json({
+        message: "Report updated successfully",
+        id
+      });
+    } else if (!result?.matchedCount) {
+      res.status(404).json({ message: `Report with id ${id} not found` });
+    } else {
+      res.status(304).json({ message: `Report with id ${id} not updated` });
+    }
+  } catch (error) {
+    if (error instanceof Error) { 
+      console.log(`Unable to update Report: ${error.message}`);
+    } else {
+      console.log(`Error with ${error}`);
+    }
+    res.status(500).json({ message: `Unable to update Report ${id}` });
+  }
+};
+
+export const deleteReport = async (req: AuthRequest, res: Response) => {
+  let id: string = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const cognitoId = req.user?.sub;
+
+  if (!cognitoId) {
+    res.status(400).json({ error: 'Invalid user token' });
+    return;
+  }
+
+  try {
+    const query = { _id: new ObjectId(id) };
+    
+    // First, check if report exists
+    const existingReport = (await collections.Reports?.findOne(query)) as unknown as Report;
+    
+    if (!existingReport) {
+      res.status(404).send(`Report with id ${id} not found.`);
+      return;
+    }
+
+    // Check if user is owner ONLY (removed admin check)
+    const isOwner = existingReport.cognitoId === cognitoId;
+    
+    if (!isOwner) {
+      res.status(403).json({ 
+        error: 'Forbidden', 
+        message: 'You can only delete your own reports' 
+      });
+      return;
+    }
+
     const result = await collections.Reports?.deleteOne(query);
 
     if (result && result.deletedCount === 1) {
-      res.status(200).json({"message": `Deleted Report ${req.params.id} from the database`});
+      res.status(200).json({
+        message: `Deleted Report ${id} from the database`
+      });
     } else {
-      res.status(404).send(`Report with id ${req.params.id} not found.`);
+      res.status(404).send(`Report with id ${id} not found.`);
     }
   } catch (error) {
     if (error instanceof Error) { 
       console.log(`Unable to delete Report with id: ${error.message}`);
     } else {
-      console.log(`error with ${error}`);
+      console.log(`Error with ${error}`);
     }
-    res.status(500).send(`Unable to delete Report ${req.params.id}`);
+    res.status(500).send(`Unable to delete Report ${id}`);
   }
 };
+

@@ -6,7 +6,7 @@ x-api-key: blahblah
 ###
 
 # Get defib by ID (replace <id> with a valid ObjectId)
-GET http://localhost:3000/api/v1/defibs/1
+GET http://localhost:3000/api/v1/defibs/699b40c00c635ff99a94dcd3
 x-api-key: blahblah
 Content-Type: application/json
 
@@ -25,11 +25,11 @@ Content-Type: application/json
         "lng": -6.2603,
         "address": "Dublin, Ireland"
     },
-    "accessInstructions": "Accessible 24/7",
+    "accessInstructions": "Accessible 24/7"
 }
 
-
+###
 # Delete defib (replace <id> with a valid ObjectId)
-DELETE http://localhost:3000/api/v1/defibs/<id>
+DELETE http://localhost:3000/api/v1/defibs/699b40c00c635ff99a94dcd3
 x-api-key: blahblah
 Content-Type: application/json
