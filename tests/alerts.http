@@ -1,5 +1,8 @@
 @userendpoint = http://localhost:3000/api/v1/alert
 
+@cognitoToken = eyJraWQiOiJXS1YxdUx0TEFiSkQ5dGEzcTR0YUdpdDFOTTY2Smt0SE05Y2tHdGRsRmRjPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJkMmI1NzRjNC05MDExLTcwMjQtNWQwYi05OWYwZGYxNDY0YjUiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbnMiXSwiZW1haWxfdmVyaWZpZWQiOnRydWUsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5ldS13ZXN0LTEuYW1hem9uYXdzLmNvbVwvZXUtd2VzdC0xX3R6dGdWM3NoVCIsImNvZ25pdG86dXNlcm5hbWUiOiJkMmI1NzRjNC05MDExLTcwMjQtNWQwYi05OWYwZGYxNDY0YjUiLCJvcmlnaW5fanRpIjoiNGViYTgzODUtYzE0Ni00YjI1LWJiNjgtMTYxZWM2ZmNlZmY1IiwiYXVkIjoiN2RhMmdtdW4zcHVrMGxoNW9yZDViNmY1dmoiLCJldmVudF9pZCI6ImE1OGU2NThjLTI1MzMtNGY4YS1hMDllLWI3MGRhOWMyZWI2YyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzcyNjY4MzUxLCJuaWNrbmFtZSI6IlZnZyIsImV4cCI6MTc3MjY3MTk1MSwiaWF0IjoxNzcyNjY4MzUxLCJqdGkiOiJjY2U1ZDlmOS0wODZhLTQyYTUtYjZiZi0xZDM5ZWRlNDAwMjEiLCJlbWFpbCI6Iml3cm9ja3lraW5nQGdtYWlsLmNvbSJ9.UclkKNccKh_SAf4G-tTciKX4b3u8YxmGrFkt1V0A6Rxls84dAzhGnYysG-7ojZdZ7I2mqwrFbN3nIywr4MmInlikZX-ZKHbhvVX5nmgwhlAjfPQvgSo7gDoSCLx6-mIah0C86H151olrCWFLF2FmwWdV6WXNbM9LAzDKrHc8QkbY8ury7vUk_kHmWXiywKVGyvrnABoe-jeeBZqpO_gphR5vI4BxL8JjzHpR1go6F9ge-AnVaoOkW2f0jl4HAb97cwJeZYm35AMirrBoq6lr3tNNUWaJZX9Ly1A27psZlliD5Lr83ke7G_0vyK4CJQbcXaFjq8VEnfuXSxe-BG6FQw
+
+
 ###
 ### POST Request for a user
 ## Expected result is ........ it works
@@ -8,18 +11,20 @@
 
 POST {{userendpoint}} HTTP/1.1
 content-type: application/json
+Authorization: Bearer {{cognitoToken}}
 //x-api-key: blahblah
 
 {
   "severity": "High",
   "category": "Fire",
-  "notes": "Smoke detected in the server room.",
+  "notes": "JOHN detected in the server room.",
   "timestamp": "2025-11-19T14:30:00Z",
   "location": {
     "lat": 53.9636,
     "lng": -8.2995,
     "address": "123 Main St, Dublin"
-  }
+  },
+  "cognitoId": "d2b574c4-9011-7024-5d0b-99f0df1464b5"
 }
 
 //-8.2995, 53.9636
@@ -35,23 +40,25 @@ x-api-key: blahblah
 
 ###
 
-GET {{userendpoint}}/691dc4dfdb10fa288070a096 HTTP/1.1
+GET {{userendpoint}}/69a8c5df93e7d2bd9be3922b HTTP/1.1
 content-type: application/json
 x-api-key: blahblah
 
 ###
-PUT {{userendpoint}}/691dc4dfdb10fa288070a096 HTTP/1.1
+PUT {{userendpoint}}/691de354819bcc1de3ee3e19 HTTP/1.1
 content-type: application/json
+Authorization: Bearer {{cognitoToken}}
 //x-api-key: blahblah
 
 {
   "severity": "High",
-  "category": "Fire",
-  "notes": "2 detected in the server room.",
-  "timestamp": "2025-11-19T14:30:00Z",
-  "location": {
-    "lat": 53.9636,
-    "lng": -8.2995,
-    "address": "123 Main St, Dublin"
-  }
+  "category": "Other",
+  "notes": "test.",
+  "timestamp": "2026-03-04T23:58:38.869Z"
 }
+
+###
+DELETE {{userendpoint}}/691de354819bcc1de3ee3e19 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{cognitoToken}}
+//x-api-key: blahblah

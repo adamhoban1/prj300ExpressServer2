@@ -38,13 +38,14 @@ export interface Report {
     location: { lat?: number; lng?: number; address?: string };
     source?: 'USER' | 'MET_EIREANN';
     externalId?: string;
+    cognitoId?: string; // The Cognito ID of the user who created the report, if applicable
 }
 
 export const createReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']),
     category: z.string().min(1),
     notes: z.string().min(0).optional(),
-    photoUrl: z.string().url().optional(),
+    photoUrl: z.string().optional(),
     timestamp: z.string().min(1),       
     location: z.object({
         lat: z.number().optional(),
@@ -52,7 +53,8 @@ export const createReportSchema = z.object({
         address: z.string().min(1).optional()
     }),
     source: z.enum(['USER', 'MET_EIREANN']).optional(),
-    externalId: z.string().min(1).optional()
+    externalId: z.string().min(1).optional(),
+    cognitoId: z.string().min(24).optional()
 });
 
 export const updateReportSchema = z.object({
@@ -68,5 +70,5 @@ export const updateReportSchema = z.object({
     }).nullable().optional(),
     source: z.enum(['USER', 'MET_EIREANN']).nullable().optional(),
     externalId: z.string().nullable().optional(),
-    UserId: z.string().nullable().optional()
+    cognitoId: z.string().min(24).nullable().optional()
 });
