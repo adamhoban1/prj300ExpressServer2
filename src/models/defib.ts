@@ -17,7 +17,7 @@ export interface Defib {
 export const createDefibSchema = z.object({
     working: z.boolean(),
     timestamp: z.string().min(1),
-    photoUrl: z.string().url().optional(),
+    photoUrl: z.string().optional(),
     accessInstructions: z.string().optional(),
     location: z.object({
         lat: z.number().optional(),
@@ -29,7 +29,7 @@ export const createDefibSchema = z.object({
 export const updateDefibSchema = z.object({
     working: z.boolean().optional(),
     timestamp: z.string().optional(),
-    photoUrl: z.string().url().optional(),
+    photoUrl: z.string().optional(),
     accessInstructions: z.string().optional(),
     location: z.object({
         lat: z.number().optional(),

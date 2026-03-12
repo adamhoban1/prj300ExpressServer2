@@ -45,7 +45,7 @@ export const createReportSchema = z.object({
     severity: z.enum(['Low', 'Moderate', 'High', 'Info', 'Urgent']),
     category: z.string().min(1),
     notes: z.string().min(0).optional(),
-    photoUrl: z.string().url().optional(),
+    photoUrl: z.string().optional(),
     timestamp: z.string().min(1),       
     location: z.object({
         lat: z.number().optional(),
